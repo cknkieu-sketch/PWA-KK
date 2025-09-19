@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Vaultie — Secure Offline Vault</title>
+  <meta name="theme-color" content="#0d9488" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" sizes="192x192" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      --teal:#0d9488; --ink:#0f172a; --muted:#475569; --bg:#f8fafc; --card:#ffffff;
+      --radius:16px; --ring:#99f6e4;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body { margin:0; background:var(--bg); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; color:var(--ink); }
+    .container { max-width: 680px; margin: 0 auto; padding: 16px; }
+    header { display:flex; align-items:center; gap:12px; padding: 16px 0; }
+    header .logo { width:36px; height:36px; border-radius:12px; background:var(--teal) url('icons/icon-192.png') center/cover no-repeat; }
+    h1 { font-size: 1.25rem; margin:0; }
+    .card { background:var(--card); border-radius: var(--radius); box-shadow: 0 10px 20px rgba(2,6,23,0.06), 0 2px 6px rgba(2,6,23,0.06); padding: 16px; }
+    .row { display:flex; gap:8px; }
+    .stack { display:flex; flex-direction:column; gap:8px; }
+    label { font-size:.9rem; color:var(--muted); }
+    input, select, button, textarea {
+      font: inherit; padding: 12px 12px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; color: var(--ink);
+    }
+    input:focus, textarea:focus, select:focus { outline: 2px solid var(--ring); border-color: transparent; }
+    button { border:0; background: var(--teal); color:#fff; cursor: pointer; }
+    button.ghost { background: #e2e8f0; color: #0f172a; }
+    button.warn { background: #ef4444; }
+    .muted { color: var(--muted); }
+    .toolbar { display:flex; gap:8px; flex-wrap:wrap; }
+    .hidden { display:none !important; }
+    .entry { padding:12px; border:1px solid #e5e7eb; border-radius:12px; display:flex; flex-direction:column; gap:6px; }
+    .entry .row { justify-content: space-between; align-items: center; }
+    .entry small { color: var(--muted); }
+    .badge { font-size:.75rem; background:#e2e8f0; color:#0f172a; padding:.2rem .5rem; border-radius:999px; }
+    .footer { font-size:.85rem; color:var(--muted); text-align:center; padding:20px 0 60px; }
+    .install-tip { margin-top: 10px; font-size: .9rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo"></div>
+      <div>
+        <h1>Vaultie</h1>
+        <div class="muted">Secure, offline, installable. Your passwords, on your device.</div>
+      </div>
+    </header>
+
+    <section id="onboarding" class="card">
+      <h2>Set up your vault</h2>
+      <div class="stack">
+        <div class="stack">
+          <label for="mpw">Create a Master Password</label>
+          <input id="mpw" type="password" placeholder="Master Password (min 8 chars)">
+        </div>
+        <div class="row">
+          <button id="setupBtn">Create Vault</button>
+          <button id="registerBioBtn" class="ghost">Enable Biometric Unlock</button>
+        </div>
+        <p class="muted">Biometric unlock uses a passkey (WebAuthn). Where supported, you'll be able to unlock without typing the master password.</p>
+      </div>
+    </section>
+
+    <section id="unlock" class="card hidden">
+      <h2>Unlock</h2>
+      <div class="stack">
+        <div class="row">
+          <input id="unlockMpw" type="password" placeholder="Master Password">
+          <button id="unlockBtn">Unlock</button>
+        </div>
+        <button id="unlockBioBtn" class="ghost">Unlock with Biometrics</button>
+        <div id="unlockMsg" class="muted"></div>
+      </div>
+    </section>
+
+    <section id="vaultUI" class="hidden">
+      <div class="card">
+        <div class="toolbar">
+          <button id="addEntryBtn">Add</button>
+          <button id="lockBtn" class="ghost">Lock</button>
+          <input id="search" placeholder="Search...">
+          <button id="exportBtn" class="ghost">Export backup</button>
+          <label class="badge"><input type="file" id="importFile" class="hidden"> Import backup</label>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px;">
+        <h3>Password Generator</h3>
+        <div class="row">
+          <label>Length <input type="number" id="genLen" min="8" max="64" value="16" style="width:90px;"></label>
+          <label><input type="checkbox" id="optLower" checked> a-z</label>
+          <label><input type="checkbox" id="optUpper" checked> A-Z</label>
+          <label><input type="checkbox" id="optNums" checked> 0-9</label>
+          <label><input type="checkbox" id="optSyms" checked> !@#$</label>
+          <button id="genBtn" class="ghost">Generate</button>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <input id="genOut" placeholder="Generated password" readonly>
+          <button id="copyGenBtn" class="ghost">Copy</button>
+        </div>
+      </div>
+
+      <div id="entries" class="stack" style="margin-top:12px;"></div>
+    </section>
+
+    <p class="install-tip">Tip: Install this app to your home screen for a native feel (Android: browser menu → “Install app”; iOS: Share → “Add to Home Screen”).</p>
+    <div class="footer">All data is encrypted on-device with AES‑256‑GCM. No accounts, no cloud.</div>
+  </div>
+
+  <script src="js/crypto.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/webauthn.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js'); });
+    }
+  </script>
+</body>
+</html>
