@@ -1,39 +1,30 @@
-# Vaultie — Secure Offline Vault (PWA)
+# PassVault (PWA)
 
-A lightweight, **installable mobile web app** to store and manage usernames, passwords, and app/site URLs. Everything is **encrypted on-device** and never leaves your phone unless you export a backup. Supports optional **biometric unlock (passkey)** where supported.
+A simple mobile-friendly, **offline** password vault. Your data is encrypted on-device with AES‑GCM. Unlock with **biometrics (WebAuthn)** when available, with **PIN** fallback. Includes a password generator and **encrypted import/export** so you can move to a new device securely.
 
 ## Features
-- **On-device encryption:** AES‑256‑GCM; vault key wrapped by your **Master Password** (PBKDF2/SHA‑256, 250k iterations)
-- **Biometric unlock:** Uses WebAuthn **PRF extension** to derive a device-bound secret and unwrap the vault key (Android/Chrome, iOS 17+/macOS Safari 17+, modern Chromium). If PRF isn’t available, the app falls back gracefully to Master Password unlock.
-- **Password generator:** Choose length (8–64) and include/exclude lowercase, uppercase, numbers, symbols.
-- **Import/Export:** Export an **encrypted** backup JSON. Import it on a new device and unlock with the same Master Password (and re‑enable biometrics on that device if desired).
-- **PWA:** Works offline; can be installed to Home Screen.
+- PWA: install to home screen, works offline
+- AES‑GCM 256-bit encryption with key wrapped by PIN (PBKDF2)
+- Optional biometric gating via WebAuthn (platform authenticator) + PIN
+- Password generator with length and character-set controls
+- Encrypted backup (.vault) export and import
 
-## Security Notes
-- Your data is stored in IndexedDB as **encrypted ciphertext**.
-- The vault’s Data Encryption Key (DEK) is randomly generated and **wrapped** 2 ways:
-  1) with a key derived from your Master Password (mandatory), and
-  2) **optionally** with a device-bound secret via WebAuthn PRF (for biometric-only unlock).
-- The backup export is **already encrypted**. Keep it safe. If you forget the Master Password and biometric isn’t configured, **data cannot be recovered**.
+## Quick start
+1. Serve these files (e.g., GitHub Pages) or open `index.html` directly.
+2. On first launch, choose a **PIN** and optionally enable **biometrics**.
+3. Add entries. Use **Export Encrypted Backup** to create a portable backup file.
+4. To restore, use **Import Backup** and enter your backup password.
 
-## Setup (GitHub Pages)
-1. Create a new GitHub repo, e.g. `vaultie`.
-2. Upload the files in this ZIP to the repo root.
-3. In GitHub, go to **Settings → Pages → Branch: main → /(root)**. Enable Pages.
-4. Visit your site at `https://<your-username>.github.io/<repo>/` (HTTPS required for biometrics).
-5. On first load, create a **Master Password**. Optionally **Enable Biometric Unlock**.
-6. **Install** to your Home Screen for a native feel.
+> **Biometrics:** Some browsers/devices require HTTPS and platform authenticator support. If enabled, unlock requires a WebAuthn assertion **and** your PIN.
 
-## Usage
-- **Add / Edit / Delete** entries (name, URL, username, password).
-- Use the **Generator** to create strong passwords respecting your chosen policy.
-- **Export backup** → stores encrypted JSON to your device.
-- **Import backup** → select a previously exported JSON to restore the vault.
-- **Lock** anytime; the app also requires unlock after reload.
+## Security model
+- Vault content is encrypted with an AES‑GCM master key.
+- Master key is wrapped by a PBKDF2‑SHA256 key derived from your PIN (150k iterations).
+- Backups are encrypted with a backup password (PBKDF2 200k).
+- Import disables biometrics (credential is device‑bound). You can reset the vault to recreate biometrics on the new device.
 
-## Compatibility
-- Works best on modern Chromium and Safari (iOS 17+). Biometric‑only unlock requires WebAuthn **PRF** support; otherwise you can still use Master Password unlock, and you may use biometric as a confirmation gate only.
+## Deploy to GitHub Pages
+- Push these files to a repo, enable **Pages** from the root.
+- Open the URL on your phone and **Add to Home screen**.
 
-## Development
-No build step. Pure HTML/CSS/JS + Web Crypto + WebAuthn.
-
+© 2025-09-19
